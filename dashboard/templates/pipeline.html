@@ -1,0 +1,65 @@
+{% extends "base.html" %} {% block title %}Pipeline{% endblock %} {% block breadcrumb %}Pipeline Status{% endblock %} {% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div>
+        <h4 class="mb-0 fw-bold">Pipeline Status</h4>
+        <small class="text-muted">Collection → Enrichment → Scoring → Rule Generation</small>
+    </div>
+    <button class="btn btn-danger ms-auto" id="runBtn" onclick="triggerPipeline()">
+    <i class="bi bi-play-fill me-1"></i>Run Full Pipeline
+  </button>
+</div>
+
+<!-- Stage progress -->
+<div class="card border-0 mb-4">
+    <div class="card-header bg-transparent border-secondary fw-semibold">
+        <i class="bi bi-diagram-3 me-2 text-primary"></i>Current Pipeline Status
+    </div>
+    <div class="card-body">
+        <div class="row g-3" id="stageCards">
+            {% for stage, icon, color in [ ('ingest','cloud-download','primary'), ('enrich','cpu','info'), ('score','speedometer2','warning'), ('rules','file-earmark-code','success') ] %}
+            <div class="col-md-3">
+                <div class="card border-secondary stage-card" id="stage-{{ stage }}">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-{{ icon }} fs-2 text-{{ color }} mb-2 d-block"></i>
+                        <div class="fw-semibold">{{ stage | capitalize }}</div>
+                        <div class="badge bg-secondary mt-1 stage-badge" id="badge-{{ stage }}">Idle</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Run history -->
+<div class="card border-0">
+    <div class="card-header bg-transparent border-secondary d-flex align-items-center">
+        <span class="fw-semibold"><i class="bi bi-clock-history me-2 text-info"></i>Pipeline Run History</span>
+        <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="loadHistory()">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover table-borderless mb-0">
+                <thead class="table-header">
+                    <tr>
+                        <th class="ps-3">Started</th>
+                        <th>Finished</th>
+                        <th>Stage</th>
+                        <th>Status</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/pipeline.js') }}"></script>
+{% endblock %}

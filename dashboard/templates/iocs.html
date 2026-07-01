@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block title %}IOC Explorer{% endblock %} {% block breadcrumb %}IOC Explorer{% endblock %} {% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div>
+        <h4 class="mb-0 fw-bold">IOC Explorer</h4>
+        <small class="text-muted">Search and filter threat indicators</small>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 mb-3">
+    <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-secondary">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+                    <input type="text" id="searchInput" class="form-control bg-transparent border-secondary" placeholder="Search IOC value...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select id="typeFilter" class="form-select form-select-sm bg-transparent border-secondary">
+          <option value="">All Types</option>
+          <option value="ip">IP</option>
+          <option value="domain">Domain</option>
+          <option value="url">URL</option>
+          <option value="md5">MD5</option>
+          <option value="sha256">SHA256</option>
+        </select>
+            </div>
+            <div class="col-md-2">
+                <select id="riskFilter" class="form-select form-select-sm bg-transparent border-secondary">
+          <option value="">All Risk</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+            </div>
+            <div class="col-md-2">
+                <select id="feedFilter" class="form-select form-select-sm bg-transparent border-secondary">
+          <option value="">All Feeds</option>
+          <option value="threatfox">ThreatFox</option>
+          <option value="urlhaus">URLHaus</option>
+          <option value="otx">OTX</option>
+        </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-sm btn-danger w-100" onclick="applyFilters()">
+          <i class="bi bi-funnel me-1"></i>Filter
+        </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-borderless mb-0" id="iocTable">
+                <thead class="table-header">
+                    <tr>
+                        <th class="ps-3">Value</th>
+                        <th>Type</th>
+                        <th>Risk</th>
+                        <th>Score</th>
+                        <th>Family</th>
+                        <th>Feed</th>
+                        <th>Last Seen</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="iocTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent border-secondary d-flex align-items-center justify-content-between">
+        <small class="text-muted" id="tableInfo">—</small>
+        <div class="d-flex gap-1" id="pagination"></div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/iocs.js') }}"></script>
+{% endblock %}

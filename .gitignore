@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+db/tip.db
+output/sigma_rules/*.yml
+venv/
+.DS_Store
+*.egg-info/
+dist/

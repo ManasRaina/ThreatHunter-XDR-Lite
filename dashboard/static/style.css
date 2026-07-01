@@ -1,0 +1,125 @@
+:root {
+    --bg-primary: #0d1117;
+    --bg-card: #161b22;
+    --bg-header: #010409;
+    --border-color: #30363d;
+    --text-muted: #8b949e;
+    --text-body: #c9d1d9;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-body);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background-color: var(--bg-header);
+    border-color: var(--border-color) !important;
+}
+
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(220, 53, 69, 0.12);
+}
+
+.stat-icon {
+    flex-shrink: 0;
+}
+
+.table {
+    color: var(--text-body);
+    font-size: 0.875rem;
+}
+
+.table-header th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.65rem 0.75rem;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.table td {
+    padding: 0.65rem 0.75rem;
+    vertical-align: middle;
+}
+
+.ioc-value {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 0.8rem;
+}
+
+.chart-wrap {
+    width: 100%;
+    max-width: 320px;
+}
+
+.badge-severity {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-critical { background-color: #dc3545; }
+.badge-high     { background-color: #fd7e14; color: #000; }
+.badge-medium   { background-color: #0dcaf0; color: #000; }
+.badge-low      { background-color: #6c757d; }
+.badge-unknown  { background-color: #495057; }
+
+.badge-rule-sigma { background-color: #6610f2; }
+.badge-rule-spl   { background-color: #198754; }
+
+footer {
+    border-color: var(--border-color) !important;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 3px;
+}
+
+@media (max-width: 576px) {
+    .ioc-value {
+        max-width: 120px;
+    }
+}

@@ -1,0 +1,180 @@
+{% extends "base.html" %} {% block title %}Detection Rules{% endblock %} {% block breadcrumb %}Detection Rules{% endblock %} {% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div>
+        <h4 class="mb-0 fw-bold">Detection Rules</h4>
+        <small class="text-muted">Auto-generated Sigma rules and SPL queries</small>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+        <a href="/api/v1/rules/download/sigma/all" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-download me-1"></i>All Sigma (.zip)
+        </a>
+        <a href="/api/v1/rules/download/spl/all" class="btn btn-sm btn-outline-info">
+            <i class="bi bi-download me-1"></i>All SPL (.txt)
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 mb-3">
+    <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-secondary">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+                    <input type="text" id="ruleSearch" class="form-control bg-transparent border-secondary" placeholder="Search rule titles...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-sm btn-danger active" id="btnSigma" onclick="setType('sigma')">Sigma</button>
+                    <button type="button" class="btn btn-sm btn-outline-info" id="btnSpl" onclick="setType('spl')">SPL</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAll" onclick="setType('')">All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rules table + preview -->
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height:520px;overflow-y:auto">
+                    <table class="table table-sm table-hover table-borderless mb-0">
+                        <thead class="table-header sticky-top">
+                            <tr>
+                                <th class="ps-3">Title</th>
+                                <th>Type</th>
+                                <th>Risk</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-secondary d-flex justify-content-between align-items-center">
+                <small class="text-muted" id="rulesInfo">—</small>
+                <div class="d-flex gap-1" id="rulesPagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview panel -->
+    <div class="col-lg-7">
+        <div class="card border-0 h-100">
+            <div class="card-header bg-transparent border-secondary d-flex align-items-center">
+                <span class="fw-semibold" id="previewTitle">Select a rule to preview</span>
+                <div class="ms-auto d-flex gap-2" id="previewActions" style="display:none!important"></div>
+            </div>
+            <div class="card-body p-0">
+                <pre id="previewContent" class="rule-preview m-0" style="min-height:400px">
+-- Select a rule from the list to preview its content here.</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    let currentType = 'sigma';
+    let currentPage = 1;
+    let selectedRule = null;
+
+    function setType(t) {
+        currentType = t;
+        currentPage = 1;
+        document.getElementById('btnSigma').className = (t === 'sigma') ? 'btn btn-sm btn-danger active' : 'btn btn-sm btn-outline-danger';
+        document.getElementById('btnSpl').className = (t === 'spl') ? 'btn btn-sm btn-info active' : 'btn btn-sm btn-outline-info';
+        document.getElementById('btnAll').className = (t === '') ? 'btn btn-sm btn-secondary active' : 'btn btn-sm btn-outline-secondary';
+        loadRules();
+    }
+
+    async function loadRules(page = 1) {
+        currentPage = page;
+        const search = document.getElementById('ruleSearch').value.trim();
+        const params = new URLSearchParams({
+            page,
+            limit: 20
+        });
+        if (currentType) params.set('type', currentType);
+        if (search) params.set('search', search);
+
+        const res = await fetch('/api/v1/rules?' + params);
+        const data = await res.json();
+        const tbody = document.getElementById('rulesBody');
+
+        if (!data.results.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No rules found.</td></tr>';
+            document.getElementById('rulesInfo').textContent = '0 rules';
+            document.getElementById('rulesPagination').innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = data.results.map(r => {
+            const typeColor = r.rule_type === 'sigma' ? 'danger' : 'info';
+            const conf = r.confidence || '';
+            const confColor = {
+                critical: 'danger',
+                high: 'warning',
+                medium: 'info',
+                low: 'secondary'
+            }[conf] || 'secondary';
+            const shortTitle = r.title.replace(/^(Sigma|SPL): /, '').slice(0, 50);
+            return `<tr class="rule-row" onclick="previewRule(${r.id}, '${r.rule_type}')" style="cursor:pointer">
+      <td class="ps-3 small">${shortTitle}</td>
+      <td><span class="badge bg-${typeColor} bg-opacity-20 text-${typeColor}">${r.rule_type.toUpperCase()}</span></td>
+      <td><span class="badge bg-${confColor} bg-opacity-20 text-${confColor}">${conf}</span></td>
+      <td>
+        <a href="/api/v1/rules/download/${r.rule_type}/${r.id}"
+           class="btn btn-xs btn-outline-secondary py-0 px-1" onclick="event.stopPropagation()">
+          <i class="bi bi-download"></i>
+        </a>
+      </td>
+    </tr>`;
+        }).join('');
+
+        document.getElementById('rulesInfo').textContent = `${data.total.toLocaleString()} rules`;
+
+        // Pagination
+        const pg = document.getElementById('rulesPagination');
+        pg.innerHTML = '';
+        for (let i = 1; i <= Math.min(data.pages, 10); i++) {
+            const btn = document.createElement('button');
+            btn.className = `btn btn-xs btn-${i === page ? 'danger' : 'outline-secondary'} py-0 px-2`;
+            btn.textContent = i;
+            btn.onclick = () => loadRules(i);
+            pg.appendChild(btn);
+        }
+    }
+
+    async function previewRule(id, ruleType) {
+        const res = await fetch('/api/v1/rules/' + id);
+        const data = await res.json();
+        document.getElementById('previewTitle').textContent = data.title;
+        document.getElementById('previewContent').textContent = data.content;
+        document.getElementById('previewActions').style.display = 'flex';
+        document.getElementById('previewActions').innerHTML = `
+    <button class="btn btn-sm btn-outline-secondary"
+            onclick="navigator.clipboard.writeText(document.getElementById('previewContent').innerText).then(()=>showToast('Copied!'))">
+      <i class="bi bi-clipboard"></i>
+    </button>
+    <a href="/api/v1/rules/download/${ruleType}/${id}" class="btn btn-sm btn-outline-success">
+      <i class="bi bi-download"></i>
+    </a>`;
+    }
+
+    document.getElementById('ruleSearch').addEventListener('input', () => {
+        clearTimeout(window._rt);
+        window._rt = setTimeout(() => loadRules(1), 400);
+    });
+
+    loadRules();
+</script>
+{% endblock %}
